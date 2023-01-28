@@ -1,0 +1,22 @@
+###
+POST http://localhost:8080/api/socks
+Content-Type: application/json
+
+{
+"socksColor": "PINK",
+"socksSize": "XS",
+"compositionOfSocks": 50,
+"quantity": 10
+}
+###
+POST http://localhost:8080/api/socks
+Content-Type: application/json
+
+{
+  "socksColor": "BLACK",
+  "socksSize": "L",
+  "compositionOfSocks": 86,
+  "quantity": 5
+}
+###
+GET http://localhost:8080/api/socks?color=BLACK
