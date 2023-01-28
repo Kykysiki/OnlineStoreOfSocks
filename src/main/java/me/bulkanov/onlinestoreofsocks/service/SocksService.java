@@ -6,10 +6,11 @@ import me.bulkanov.onlinestoreofsocks.exception.UnsuitableSocksException;
 import me.bulkanov.onlinestoreofsocks.model.Socks;
 import me.bulkanov.onlinestoreofsocks.model.SocksColor;
 import me.bulkanov.onlinestoreofsocks.model.SocksSize;
+import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
-
+@Service
 public class SocksService {
     private final Map<Socks, Integer> sock = new HashMap<>();
 
@@ -26,14 +27,7 @@ public class SocksService {
 
     // Регистрирует отпуск носков со склада.
     public void removeSocks(SocksRequest socksRequest) {
-        validateRequest(socksRequest);
-        Socks socks = mapToSocks(socksRequest);
-        int socksQuantity = sock.getOrDefault(socks, 0);
-        if (socksQuantity >= socksRequest.getQuantity()) {
-            sock.put(socks, socksQuantity - socksRequest.getQuantity());
-        } else {
-            throw new EnoughSocksException("Нет носков для отпуска со склада.");
-        }
+        decreaseSocksQuanty(socksRequest);
     }
 
     //Общее количество носков на складе по запросу.
@@ -62,14 +56,30 @@ public class SocksService {
         if (socksRequest.getSocksColor() == null || socksRequest.getSocksSize() == null) {
             throw new UnsuitableSocksException("Все поля должны быть заполнены.");
         }
-        if (socksRequest.getCompositionOfSocks() < 0 && socksRequest.getCompositionOfSocks() > 100) {
+        if (socksRequest.getCompositionOfSocks() < 0 || socksRequest.getCompositionOfSocks() > 100) {
             throw new UnsuitableSocksException("Процент содержания хлопка в составе должен быть от 0 до 100.");
         }
-        if (socksRequest.getQuantity() > 0) {
+        if (socksRequest.getQuantity() <= 0) {
             throw new UnsuitableSocksException("Количество носков должно быть больше 0.");
         }
     }
+
     private Socks mapToSocks(SocksRequest socksRequest) {
         return new Socks(socksRequest.getSocksColor(), socksRequest.getSocksSize(), socksRequest.getCompositionOfSocks());
+    }
+
+    public void removeDefectiveSocks(SocksRequest socksRequest) {
+        decreaseSocksQuanty(socksRequest);
+    }
+
+    private void decreaseSocksQuanty(SocksRequest socksRequest) {
+        validateRequest(socksRequest);
+        Socks socks = mapToSocks(socksRequest);
+        int socksQuantity = sock.getOrDefault(socks, 0);
+        if (socksQuantity >= socksRequest.getQuantity()) {
+            sock.put(socks, socksQuantity - socksRequest.getQuantity());
+        } else {
+            throw new EnoughSocksException("Нет носков для отпуска со склада.");
+        }
     }
 }
